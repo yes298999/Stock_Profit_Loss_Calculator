@@ -1,2 +1,9 @@
-# Stock_Profit_Loss_Calculator
-Stock Profit and Loss Calculator
+  === 【版權宣言】 ===
+		
+			@ 程式開發者：富途 - 發哥 【免費指標王】
+			@ 發哥免費指標王的個人主頁 - 牛牛圈 
+					https://q.futunn.com/hk/profile/27543329/
+			@ 【發哥免費指標王】港美股票交流討論頻道，分享更多免費指標： 
+					https://snsim.futunn.com/share/server/j84D5?lang=zh-hk
+			@ 授權任何個人可以免費使用、分發、修改和分享。
+			@ 但是，必須保留以上全部【版權宣言】在頂端位置。不得作出任何刪除或者修改。
