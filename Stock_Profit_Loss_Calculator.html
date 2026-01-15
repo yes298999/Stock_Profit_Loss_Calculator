@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>股票盈虧計算器</title>
+    <style>
+	
+		/* 			  === 【版權宣言】 ===
+		
+			@ 程式開發者：富途 - 發哥 【免費指標王】
+			@ 發哥免費指標王的個人主頁 - 牛牛圈 
+					https://q.futunn.com/hk/profile/27543329/
+			@ 【發哥免費指標王】港美股票交流討論頻道，分享更多免費指標： 
+					https://snsim.futunn.com/share/server/j84D5?lang=zh-hk
+			@ 授權任何個人可以免費使用、分發、修改和分享。
+			@ 但是，必須保留以上全部【版權宣言】在頂端位置。不得作出任何刪除或者修改。
+		*/
+
+	
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+        body {
+            padding: 20px;
+            line-height: 1.6;
+            background-color: #f9f9f9;
+            font-size: 16px;
+        }
+        .outer-wrapper {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: #f0f8ff;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+        }
+        .calc-section {
+            margin: 15px 0;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        /* 新增：百分比區間獨立DIV樣式 */
+        .percentage-section {
+            margin: 15px 0;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        /* 兩欄橫排佈局容器 */
+        .two-column-container {
+            display: flex;
+            gap: 20px;
+            margin: 15px 0;
+        }
+        /* 響應式適配：小螢幕自動換行 */
+        @media (max-width: 768px) {
+            .two-column-container {
+                flex-direction: column;
+            }
+        }
+        /* 每欄佔比均分 */
+        .two-column-item {
+            flex: 1;
+            min-width: 280px; /* 最小寬度，避免過窄 */
+        }
+        .input-group {
+            display: inline-flex;
+            align-items: center;
+            margin-right: 15px;
+            margin-bottom: 10px;
+        }
+        .input-group label {
+            margin-right: 8px;
+            font-weight: 600;
+        }
+        .input-group input {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 120px;
+        }
+        button {
+            padding: 8px 20px;
+            color: white;
+            border: none;
+            border-radius: 9999px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 8px;
+            /* 過渡效果，讓顏色切換更流暢 */
+            transition: background-color 0.2s ease;
+        }
+        #calculateBtn, #colorPickerBtn, #fontIncreaseBtn, #fontDecreaseBtn {
+            width: 46px;
+            height: 46px;
+            padding: 0;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 37px;
+            line-height: 1;
+        }
+        .profit {
+            color: green;
+            font-weight: bold;
+        }
+        .loss {
+            color: red;
+            font-weight: bold;
+        }
+        .neutral {
+            color: #666;
+            font-weight: bold;
+        }
+        .table-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%; /* 改為100%，適應父容器寬度 */
+            margin: 0 auto;
+        }
+        th, td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #ddd;
+            width: 33.33%;
+        }
+        th {
+            background-color: #f8f9fa;
+        }
+        .section-title {
+            font-size: 18px;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        .invalid-input {
+            border: 1px solid red !important;
+        }
+        /* 標題相關樣式 */
+        .font-bold {
+            font-weight: 700;
+        }
+        /* 單獨設置主標題顏色，確保為#3B82F6 */
+        .header-main-title {
+            color: #3B82F6 !important;
+            font-weight: 700 !important;
+        }
+        .text-gray-600 {
+            color: #4b5563 !important; /* 副標題顏色 */
+        }
+        .text-center {
+            text-align: center;
+        }
+        .mb-2 {
+            margin-bottom: 0.5rem;
+        }
+        .mb-8 {
+            margin-bottom: 2rem;
+        }
+        /* 移除連結底線 */
+        .header-link {
+            text-decoration: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="outer-wrapper" id="outerWrapper">
+        <!-- 頁面標題 -->
+        <header class="text-center mb-8">
+            <!-- 使用單獨類名強制設置顏色，確保不是黑色 -->
+            <h1 style="font-size: 2.0rem !important;" class="header-main-title mb-2">股票盈虧計算器</h1>
+            <p class="text-gray-600">
+                <a href='https://snsim.futunn.com/share/server/j84D5?lang=zh-hk' target='_blank' class="header-link">
+                    由 富途 【發哥免費指標王】 編寫免費分享
+                </a>
+            </p>
+        </header>
+
+        <div id="inputDiv" class="calc-section">
+            <div class="section-title">輸入資料</div>
+            <div class="input-group">
+                <label for="buyPrice">買入價：</label>
+                <input type="text" id="buyPrice" placeholder="請輸入買入價" oninput="validatePositiveNumber(this)" onkeypress="preventNonNumberKey(event, false)">
+            </div>
+            <div class="input-group">
+                <label for="quantity">數量：</label>
+                <input type="text" id="quantity" placeholder="請輸入數量" oninput="validatePositiveInteger(this)" onkeypress="preventNonNumberKey(event, true)">
+            </div>
+            <div class="input-group">
+                <label for="currentPrice">現價：</label>
+                <input type="text" id="currentPrice" placeholder="請輸入現價" oninput="validatePositiveNumber(this)" onkeypress="preventNonNumberKey(event, false)">
+            </div>
+            <button id="calculateBtn">🧮</button>
+            <button id="colorPickerBtn">🎨</button>
+            <button id="fontIncreaseBtn">🔼</button>
+            <button id="fontDecreaseBtn">🔽</button>
+        </div>
+
+        <div id="profitLossDiv" class="calc-section">
+            <div class="section-title">即時盈虧計算</div>
+            <div id="realTimeResult">請輸入資料並點擊計算按鈕</div>
+        </div>
+
+        <div id="percentageDiv" class="calc-section">
+            <div class="section-title">百分比盈虧明細</div>
+            <!-- 空容器，用於動態生成四個獨立的百分比區間DIV -->
+            <div id="percentageContent"></div>
+        </div>
+
+        <!-- 頁腳信息 -->
+        <footer class="text-center text-gray-500 text-sm mt-12">
+            <p>© 2026 【股票盈虧計算器】 | <a href='https://snsim.futunn.com/share/server/j84D5?lang=zh-hk' target='_blank' class="header-link">由 富途 【發哥免費指標王】 編寫免費分享</a></p>
+        </footer>
+    </div>
+
+    <script>
+        let currentFontScale = 1;
+        const fontStep = 0.1;
+        const minFontScale = 0.5;
+        const maxFontScale = 2;
+
+        // 生成隨機淺色（適合背景）
+        function getRandomLightColor() {
+            const r = Math.floor(Math.random() * 75) + 180;
+            const g = Math.floor(Math.random() * 75) + 180;
+            const b = Math.floor(Math.random() * 75) + 180;
+            return `rgb(${r}, ${g}, ${b})`;
+        }
+
+        // 生成隨機按鈕主色
+        function getRandomBtnColor() {
+            const r = Math.floor(Math.random() * 120) + 60;
+            const g = Math.floor(Math.random() * 120) + 60;
+            const b = Math.floor(Math.random() * 120) + 60;
+            return `rgb(${r}, ${g}, ${b})`;
+        }
+
+        // 顏色加深處理函數
+        function darkenColor(color, amount = 30) {
+            const rgbMatch = color.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+            if (!rgbMatch) return color;
+            let r = parseInt(rgbMatch[1]) - amount;
+            let g = parseInt(rgbMatch[2]) - amount;
+            let b = parseInt(rgbMatch[3]) - amount;
+            r = r < 0 ? 0 : r;
+            g = g < 0 ? 0 : g;
+            b = b < 0 ? 0 : b;
+            return `rgb(${r}, ${g}, ${b})`;
+        }
+
+        // 設置所有按鈕的隨機顏色和懸浮效果
+        function setRandomBtnBgColor() {
+            const buttons = [
+                document.getElementById('calculateBtn'),
+                document.getElementById('colorPickerBtn'),
+                document.getElementById('fontIncreaseBtn'),
+                document.getElementById('fontDecreaseBtn')
+            ];
+
+            buttons.forEach(btn => {
+                if (btn) {
+                    const originalColor = getRandomBtnColor();
+                    const hoverColor = darkenColor(originalColor);
+                    
+                    // 設置默認顏色
+                    btn.style.backgroundColor = originalColor;
+                    
+                    // 鼠標懸浮事件
+                    btn.addEventListener('mouseover', function() {
+                        this.style.backgroundColor = hoverColor;
+                    });
+                    
+                    // 鼠標離開事件
+                    btn.addEventListener('mouseout', function() {
+                        this.style.backgroundColor = originalColor;
+                    });
+                    
+                    // 保存原始顏色到按鈕屬性，方便後續重置
+                    btn.dataset.originalColor = originalColor;
+                    btn.dataset.hoverColor = hoverColor;
+                }
+            });
+        }
+
+        // 設置所有可配色DIV的隨機背景色（包含最外層容器）
+        function setAllDivRandomColors() {
+            // 最外層容器
+            const outerWrapper = document.getElementById('outerWrapper');
+            outerWrapper.style.backgroundColor = getRandomLightColor();
+            
+            // 基礎計算區塊
+            const baseSections = document.querySelectorAll('.calc-section');
+            baseSections.forEach(div => {
+                div.style.backgroundColor = getRandomLightColor();
+            });
+            
+            // 百分比區間獨立DIV
+            const percentageSections = document.querySelectorAll('.percentage-section');
+            percentageSections.forEach(div => {
+                div.style.backgroundColor = getRandomLightColor();
+            });
+        }
+
+        // 調整字體大小
+        function adjustFontSize(scaleChange) {
+            currentFontScale += scaleChange;
+            currentFontScale = Math.max(minFontScale, Math.min(maxFontScale, currentFontScale));
+            const newFontSize = 16 * currentFontScale + 'px';
+
+            const allElements = document.querySelectorAll('div, input, label, table, th, td');
+            allElements.forEach(el => el.style.fontSize = newFontSize);
+            
+            // 保持按鈕內部圖標大小不變
+            const iconButtons = document.querySelectorAll('#calculateBtn, #colorPickerBtn, #fontIncreaseBtn, #fontDecreaseBtn');
+            iconButtons.forEach(btn => btn.style.fontSize = '37px');
+        }
+
+        // 初始化基礎顏色（包含最外層容器）
+        setAllDivRandomColors();
+        setRandomBtnBgColor();
+
+        // 輸入驗證 - 正數
+        function preventNonNumberKey(event, isInteger) {
+            const key = event.key;
+            const allowedKeys = ['0','1','2','3','4','5','6','7','8','9','Backspace','Delete','ArrowLeft','ArrowRight'];
+            if (!isInteger) {
+                allowedKeys.push('.');
+            }
+            if (!allowedKeys.includes(key)) {
+                event.preventDefault();
+            }
+            if (key === '.' && event.target.value.includes('.')) {
+                event.preventDefault();
+            }
+        }
+
+        function validatePositiveNumber(input) {
+            let value = input.value.replace(/[^0-9.]/g, '');
+            const dotIndex = value.indexOf('.');
+            if (dotIndex !== -1) {
+                value = value.slice(0, dotIndex + 1) + value.slice(dotIndex + 1).replace(/\./g, '');
+            }
+            value = value.replace(/^0+(?=\d)/, '0').replace(/^0+(?=\.)/, '0');
+            value = value.replace(/-/g, '');
+            if (value === '.' || value === '') {
+                value = '';
+            }
+            input.value = value;
+            input.classList.toggle('invalid-input', value === '' && input.value !== '');
+        }
+
+        // 輸入驗證 - 正整數
+        function validatePositiveInteger(input) {
+            let value = input.value.replace(/[^0-9]/g, '');
+            value = value.replace(/^0+(?=\d)/, '');
+            if (value === '') {
+                value = '';
+            }
+            input.value = value;
+            input.classList.toggle('invalid-input', value === '' && input.value !== '');
+        }
+
+        // 計算盈虧
+        function calculateProfitLoss() {
+            const buyPrice = parseFloat(document.getElementById('buyPrice').value);
+            const quantity = parseInt(document.getElementById('quantity').value);
+            const currentPrice = parseFloat(document.getElementById('currentPrice').value);
+
+            if (isNaN(buyPrice) || buyPrice <= 0 || buyPrice.toString() === '.') {
+                alert('買入價必須是正數！');
+                document.getElementById('buyPrice').focus();
+                return;
+            }
+            if (isNaN(quantity) || quantity <= 0 || !Number.isInteger(quantity)) {
+                alert('數量必須是正整數！');
+                document.getElementById('quantity').focus();
+                return;
+            }
+            if (isNaN(currentPrice) || currentPrice <= 0 || currentPrice.toString() === '.') {
+                alert('現價必須是正數！');
+                document.getElementById('currentPrice').focus();
+                return;
+            }
+
+            const totalCost = buyPrice * quantity;
+            const currentValue = currentPrice * quantity;
+            const profitLoss = currentValue - totalCost;
+            const profitLossRate = (profitLoss / totalCost) * 100;
+
+            let realTimeHtml = `
+                <p>買入總價：${totalCost.toFixed(2)} 元</p>
+                <p>當前總價：${currentValue.toFixed(2)} 元</p>
+                <p>盈虧金額：<span class="${profitLoss > 0 ? 'profit' : profitLoss < 0 ? 'loss' : 'neutral'}">${profitLoss.toFixed(2)} 元</span></p>
+                <p>盈虧比例：<span class="${profitLoss > 0 ? 'profit' : profitLoss < 0 ? 'loss' : 'neutral'}">${profitLossRate.toFixed(2)}%</span></p>
+            `;
+            document.getElementById('realTimeResult').innerHTML = realTimeHtml;
+
+            generatePercentageTables(buyPrice, quantity);
+        }
+
+        // 生成四個獨立的百分比區間DIV（分兩組橫排顯示）
+        function generatePercentageTables(buyPrice, quantity) {
+            const contentContainer = document.getElementById('percentageContent');
+            contentContainer.innerHTML = ''; // 清空原有內容
+
+            // 分組定義：第一組（1%-10%）、第二組（11%-99%）
+            const groups = [
+                {
+                    title: '', // 組別無單獨標題
+                    items: [
+                        { id: 'up1-10', title: '上漲 1% - 10%', start: 1.01, end: 1.10, step: 0.01, type: 'up' },
+                        { id: 'down1-10', title: '下跌 1% - 10%', start: 0.99, end: 0.90, step: -0.01, type: 'down' }
+                    ]
+                },
+                {
+                    title: '',
+                    items: [
+                        { id: 'up11-99', title: '上漲 11% - 99%', start: 1.11, end: 1.99, step: 0.01, type: 'up' },
+                        { id: 'down11-99', title: '下跌 11% - 99%', start: 0.89, end: 0.01, step: -0.01, type: 'down' }
+                    ]
+                }
+            ];
+
+            // 遍歷分組，生成兩欄佈局
+            groups.forEach(group => {
+                // 創建兩欄佈局容器
+                const columnContainer = document.createElement('div');
+                columnContainer.className = 'two-column-container';
+
+                // 生成每欄的獨立DIV
+                group.items.forEach(section => {
+                    // 創建獨立的百分比區間DIV
+                    const sectionDiv = document.createElement('div');
+                    sectionDiv.id = section.id;
+                    sectionDiv.className = 'percentage-section two-column-item'; // 添加欄目樣式
+                    // 設置隨機背景色
+                    sectionDiv.style.backgroundColor = getRandomLightColor();
+
+                    // 創建區間標題
+                    const title = document.createElement('h4');
+                    title.style.textAlign = 'center';
+                    title.style.marginBottom = '10px';
+                    title.textContent = section.title;
+                    sectionDiv.appendChild(title);
+
+                    // 創建表格容器
+                    const tableContainer = document.createElement('div');
+                    tableContainer.className = 'table-container';
+
+                    // 創建表格
+                    const table = document.createElement('table');
+                    table.innerHTML = `
+                        <thead>
+                            <tr>
+                                <th>%</</th>
+                                <th>股價</</th>
+                                <th>盈虧</</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    `;
+
+                    // 填充表格數據
+                    const tbody = table.querySelector('tbody');
+                    for (let rate = section.start; 
+                         (section.step > 0 ? rate <= section.end : rate >= section.end); 
+                         rate += section.step) {
+                        rate = parseFloat(rate.toFixed(2));
+                        const displayRate = Math.round((rate - 1) * 100);
+                        const price = buyPrice * rate;
+                        const profitLoss = (price - buyPrice) * quantity;
+                        const className = profitLoss > 0 ? 'profit' : profitLoss < 0 ? 'loss' : 'neutral';
+                        
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${displayRate}%</td>
+                            <td>${price.toFixed(3)}</td>
+                            <td class="${className}">${profitLoss.toFixed(2)} 元</td>
+                        `;
+                        tbody.appendChild(tr);
+                    }
+
+                    tableContainer.appendChild(table);
+                    sectionDiv.appendChild(tableContainer);
+                    columnContainer.appendChild(sectionDiv); // 加入兩欄容器
+                });
+
+                contentContainer.appendChild(columnContainer); // 加入總容器
+            });
+        }
+
+        // 事件綁定 - 計算按鈕
+        document.getElementById('calculateBtn').addEventListener('click', calculateProfitLoss);
+        // 事件綁定 - 輸入框回車計算
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    calculateProfitLoss();
+                }
+            });
+        });
+
+        // 事件綁定 - 調色盤按鈕（更新所有DIV和按鈕顏色，包含最外層容器）
+        document.getElementById('colorPickerBtn').addEventListener('click', function() {
+            // 更新所有DIV背景色（最外層容器 + 基礎區塊 + 百分比區間區塊）
+            setAllDivRandomColors();
+            // 重新設置按鈕顏色和懸浮效果
+            setRandomBtnBgColor();
+        });
+
+        // 事件綁定 - 字體增大/縮小
+        document.getElementById('fontIncreaseBtn').addEventListener('click', function() {
+            adjustFontSize(fontStep);
+        });
+        document.getElementById('fontDecreaseBtn').addEventListener('click', function() {
+            adjustFontSize(-fontStep);
+        });
+    </script>
+</body>
+</html>
